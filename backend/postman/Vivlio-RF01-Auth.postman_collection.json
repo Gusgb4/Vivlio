@@ -1,0 +1,160 @@
+{
+  "info": {
+    "name": "Vivlio - RF01 Cadastro e Autenticacao",
+    "description": "Colecao para os casos TC01 a TC04 do Plano de Testes. Variaveis: baseUrl (http://localhost:8080) e token (preenchida automaticamente).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "TC01 - Cadastro com dados validos",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test('saldo inicia em 0', () => pm.expect(body.usuario.saldoCreditos).to.eql(0));",
+              "pm.collectionVariables.set('token', body.token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/auth/registrar", "host": ["{{baseUrl}}"], "path": ["api", "auth", "registrar"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Usuario de Teste\",\n  \"email\": \"teste@vivlio.com\",\n  \"senha\": \"senhaSegura1\"\n}"
+        }
+      }
+    },
+    {
+      "name": "TC02 - Cadastro com e-mail duplicado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 409', () => pm.response.to.have.status(409));",
+              "pm.test('mensagem oficial', () => pm.expect(pm.response.json().mensagem).to.eql('E-mail j\u00e1 cadastrado. Por favor, fa\u00e7a login.'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/auth/registrar", "host": ["{{baseUrl}}"], "path": ["api", "auth", "registrar"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Outro Usuario\",\n  \"email\": \"teste@vivlio.com\",\n  \"senha\": \"senhaSegura1\"\n}"
+        }
+      }
+    },
+    {
+      "name": "TC03 - Cadastro com campos vazios",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 400', () => pm.response.to.have.status(400));",
+              "pm.test('campos sinalizados', () => pm.expect(pm.response.json().campos).to.have.all.keys('nome', 'email', 'senha'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/auth/registrar", "host": ["{{baseUrl}}"], "path": ["api", "auth", "registrar"] },
+        "body": { "mode": "raw", "raw": "{\n  \"nome\": \"\",\n  \"email\": \"\",\n  \"senha\": \"\"\n}" }
+      }
+    },
+    {
+      "name": "Login - credenciais validas",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('token', pm.response.json().token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"teste@vivlio.com\",\n  \"senha\": \"senhaSegura1\"\n}" }
+      }
+    },
+    {
+      "name": "Login - senha incorreta",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('status 401', () => pm.response.to.have.status(401));"]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"teste@vivlio.com\",\n  \"senha\": \"senhaErrada\"\n}" }
+      }
+    },
+    {
+      "name": "RNF02 - Perfil sem token (deve bloquear)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('status 401', () => pm.response.to.have.status(401));"]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/usuarios/me", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "me"] }
+      }
+    },
+    {
+      "name": "Perfil com token valido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "pm.test('saldo visivel', () => pm.expect(pm.response.json()).to.have.property('saldoCreditos'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": { "raw": "{{baseUrl}}/api/usuarios/me", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "me"] }
+      }
+    }
+  ]
+}
