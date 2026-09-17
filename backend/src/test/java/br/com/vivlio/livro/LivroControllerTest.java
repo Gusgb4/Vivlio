@@ -1,5 +1,6 @@
 package br.com.vivlio.livro;
 
+import br.com.vivlio.credito.TransacaoCreditoRepository;
 import br.com.vivlio.usuario.Usuario;
 import br.com.vivlio.usuario.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,10 +30,14 @@ class LivroControllerTest {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private TransacaoCreditoRepository transacaoCreditoRepository;
+
     private Usuario doador;
 
     @BeforeEach
     void prepararAcervo() {
+        transacaoCreditoRepository.deleteAll();
         livroRepository.deleteAll();
         usuarioRepository.deleteAll();
 
