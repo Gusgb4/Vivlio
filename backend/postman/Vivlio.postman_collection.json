@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "Vivlio - RF01 Autenticacao e RF05 Acervo",
+    "name": "Vivlio - Backend (RF01, RF02, RF03, RF05)",
     "description": "Colecao dos casos de teste do backend. Variaveis: baseUrl (http://localhost:8080) e token (preenchida automaticamente pelo cadastro/login).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -369,6 +369,129 @@
               "value": "romance"
             }
           ]
+        }
+      }
+    },
+    {
+      "name": "TC05 - Doacao com dados completos (+1 credito)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test('livro DISPONIVEL', () => pm.expect(body.livro.status).to.eql('DISPONIVEL'));",
+              "pm.test('saldo incrementado', () => pm.expect(body.saldoCreditos).to.be.above(0));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/livros",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "livros"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Dom Casmurro\",\n  \"autor\": \"Machado de Assis\",\n  \"genero\": \"Romance\"\n}"
+        }
+      }
+    },
+    {
+      "name": "TC06 - Doacao com campos vazios",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 400', () => pm.response.to.have.status(400));",
+              "pm.test('campos sinalizados', () => pm.expect(pm.response.json().campos).to.have.all.keys('titulo', 'autor', 'genero'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/livros",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "livros"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"\",\n  \"autor\": \"\",\n  \"genero\": \"\"\n}"
+        }
+      }
+    },
+    {
+      "name": "RNF02 - Doacao sem token (deve bloquear)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/livros",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "livros"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Dom Casmurro\",\n  \"autor\": \"Machado de Assis\",\n  \"genero\": \"Romance\"\n}"
         }
       }
     }
